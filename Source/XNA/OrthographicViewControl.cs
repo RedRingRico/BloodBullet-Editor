@@ -14,6 +14,38 @@ namespace BloodBulletEditor
 
 	class OrthographicViewControl : GraphicsDeviceControl
 	{
+		public OrthographicViewControl( VIEWPLANE p_ViewPlane ) :
+			base( )
+		{
+			m_ViewPlane = p_ViewPlane;
+
+			switch( m_ViewPlane )
+			{
+				case VIEWPLANE.VIEWPLANE_XY:
+				{
+					m_ClearColour = Color.Red;
+					this.Name = "Orthographic View [Front]";
+					break;
+				}
+				case VIEWPLANE.VIEWPLANE_XZ:
+				{
+					m_ClearColour = Color.Green;
+					this.Name = "Orthographic View [Top]";
+					break;
+				}
+				case VIEWPLANE.VIEWPLANE_YZ:
+				{
+					m_ClearColour = Color.Blue;
+					this.Name = "Orthographic View [Side]";
+					break;
+				}
+				default:
+				{
+					break;
+				}
+			}
+		}
+
 		protected override int Initialise( )
 		{
 			Application.Idle += delegate { Invalidate( ); };
@@ -27,17 +59,14 @@ namespace BloodBulletEditor
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
-					m_ClearColour = Color.Red;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
-					m_ClearColour = Color.Green;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
-					m_ClearColour = Color.Blue;
 					break;
 				}
 				default:

@@ -7,8 +7,9 @@ namespace BloodBulletEditor
 {
 	abstract public class GraphicsDeviceControl : Control
 	{
-		GraphicsDeviceService			m_GraphicsDeviceService;
-		ServiceContainer				m_Services = new ServiceContainer( );
+		GraphicsDeviceService	m_GraphicsDeviceService;
+		ServiceContainer		m_Services = new ServiceContainer( );
+		private Label			m_Label = new Label( );
 
 		protected Microsoft.Xna.Framework.Color	m_ClearColour;
 
@@ -51,9 +52,19 @@ namespace BloodBulletEditor
 					m_GraphicsDeviceService );
 
 				Initialise( );
+
+				m_Label.Text = this.Name;
+				m_Label.AutoSize = true;
+				this.Controls.Add( m_Label );
 			}
 
 			base.OnCreateControl( );
+		}
+
+		protected override void OnResize( EventArgs p_Args )
+		{
+			m_Label.Location = new Point( 0,
+				this.Size.Height - m_Label.Size.Height );
 		}
 
 		protected override void Dispose( bool p_Disposing )
@@ -67,7 +78,7 @@ namespace BloodBulletEditor
 			base.Dispose( p_Disposing );
 		}
 
-		protected override void OnPaint( PaintEventArgs e )
+		protected override void OnPaint( PaintEventArgs p_Args )
 		{
 			int BeginDrawError = BeginDraw( );
 
@@ -75,13 +86,14 @@ namespace BloodBulletEditor
 			{
 				Draw( );
 				EndDraw( );
+
 			}
 			else
 			{
-				PaintUsingSystemDrawing( e.Graphics, "General Error" );
+				PaintUsingSystemDrawing( p_Args.Graphics, "General Error" );
 			}
 
-			base.OnPaint( e );
+			base.OnPaint( p_Args );
 		}
 
 		int BeginDraw( )

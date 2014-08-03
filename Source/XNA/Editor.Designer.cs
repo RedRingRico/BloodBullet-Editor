@@ -1,26 +1,29 @@
 ﻿using System.Windows.Forms;
 using System.Drawing;
+using System.Reflection;
+using System;
 
 namespace BloodBulletEditor
 {
 	partial class Editor
 	{
-		private System.ComponentModel.IContainer components = null;
+		private System.ComponentModel.IContainer m_Components = null;
 
-		protected override void Dispose(bool disposing)
+		protected override void Dispose( bool p_Disposing )
 		{
-			if (disposing && (components != null))
+			if( p_Disposing && ( m_Components != null ) )
 			{
-				components.Dispose();
+				m_Components.Dispose( );
 			}
-			base.Dispose(disposing);
+
+			base.Dispose( p_Disposing );
 		}
 
-		private void InitializeComponent()
+		private void InitializeComponent( )
 		{
 			m_MainMenu = new MainMenu( );
-			m_SplitContainers = new SplitContainer[ 4 ];
-			for( int i = 0; i < 4; ++i )
+			m_SplitContainers = new SplitContainer[ 3 ];
+			for( int i = 0; i < 3; ++i )
 			{
 				m_SplitContainers[ i ] =
 					new SplitContainer( );
@@ -29,19 +32,18 @@ namespace BloodBulletEditor
 
 			m_OrthographicViews = new OrthographicViewControl[ 3 ];
 
+			m_OrthographicViews[ 0 ] =
+				new OrthographicViewControl( VIEWPLANE.VIEWPLANE_XY );
+			m_OrthographicViews[ 1 ] =
+				new OrthographicViewControl( VIEWPLANE.VIEWPLANE_XZ );
+			m_OrthographicViews[ 2 ] =
+				new OrthographicViewControl( VIEWPLANE.VIEWPLANE_YZ );
+
 			for( int i = 0; i < 3; ++i )
 			{
-				m_OrthographicViews[ i ] = new OrthographicViewControl( );
 				m_OrthographicViews[ i ].Dock = DockStyle.Fill;
 				m_OrthographicViews[ i ].Location = new Point( 0, 0 );
 			}
-
-			m_OrthographicViews[ 0 ].ViewPlane = VIEWPLANE.VIEWPLANE_XY;
-			m_OrthographicViews[ 0 ].Name = "Orthographic View [XY]";
-			m_OrthographicViews[ 1 ].ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
-			m_OrthographicViews[ 1 ].Name = "Orthographic View [XZ]";
-			m_OrthographicViews[ 2 ].ViewPlane = VIEWPLANE.VIEWPLANE_YZ;
-			m_OrthographicViews[ 2 ].Name = "Orthographic View [YZ]";
 
 			m_PerspectiveView = new PerspectiveViewControl( );
 			m_PerspectiveView.Dock = DockStyle.Fill;
@@ -84,7 +86,7 @@ namespace BloodBulletEditor
 
 			this.Controls.Add( m_SplitContainers[ 0 ] );
 
-			this.components = new System.ComponentModel.Container( );
+			this.m_Components = new System.ComponentModel.Container( );
 			this.AutoScaleMode = AutoScaleMode.Font;
 			this.Name = "BloodBulletEditor";
 			this.Text = "Blood Bullet Editor";
