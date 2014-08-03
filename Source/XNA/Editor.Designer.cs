@@ -1,4 +1,7 @@
-﻿namespace BloodBulletEditor
+﻿using System.Windows.Forms;
+using System.Drawing;
+
+namespace BloodBulletEditor
 {
 	partial class Editor
 	{
@@ -15,12 +18,40 @@
 
 		private void InitializeComponent()
 		{
-			m_MainMenu = new System.Windows.Forms.MainMenu( );
+			m_MainMenu = new MainMenu( );
+			m_SplitContainers = new SplitContainer[ 4 ];
+			for( int i = 0; i < 4; ++i )
+			{
+				m_SplitContainers[ i ] =
+					new SplitContainer( );
+				m_SplitContainers[ i ].Name = "Split Container #" + i;
+			}
+
+			m_OrthographicViews = new OrthographicViewControl[ 3 ];
+
+			for( int i = 0; i < 3; ++i )
+			{
+				m_OrthographicViews[ i ] = new OrthographicViewControl( );
+				m_OrthographicViews[ i ].Dock = DockStyle.Fill;
+				m_OrthographicViews[ i ].Location = new Point( 0, 0 );
+			}
+
+			m_OrthographicViews[ 0 ].ViewPlane = VIEWPLANE.VIEWPLANE_XY;
+			m_OrthographicViews[ 0 ].Name = "Orthographic View [XY]";
+			m_OrthographicViews[ 1 ].ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
+			m_OrthographicViews[ 1 ].Name = "Orthographic View [XZ]";
+			m_OrthographicViews[ 2 ].ViewPlane = VIEWPLANE.VIEWPLANE_YZ;
+			m_OrthographicViews[ 2 ].Name = "Orthographic View [YZ]";
+
+			m_PerspectiveView = new PerspectiveViewControl( );
+			m_PerspectiveView.Dock = DockStyle.Fill;
+			m_PerspectiveView.Location = new Point( 0, 0 );
+			m_PerspectiveView.Name = "Perspective View";
 
 			// File sub-menu
-			m_FileMenu = new System.Windows.Forms.MenuItem( "&File" );
-			m_FileExit = new System.Windows.Forms.MenuItem( "&Exit",
-				this.FileExit, System.Windows.Forms.Shortcut.CtrlQ );
+			m_FileMenu = new MenuItem( "&File" );
+			m_FileExit = new MenuItem( "&Exit",
+				this.FileExit, Shortcut.CtrlQ );
 
 			this.SuspendLayout( );
 
@@ -29,19 +60,38 @@
 
 			this.Menu = m_MainMenu;
 
-			m_Orthographic0 = new OrthographicViewControl( );
+			m_SplitContainers[ 1 ].Dock = DockStyle.Fill;
+			m_SplitContainers[ 1 ].Location = new Point( 0, 0 );
+			m_SplitContainers[ 1 ].Panel1.Controls.Add( m_OrthographicViews[ 0 ] );
+			m_SplitContainers[ 1 ].Panel2.Controls.Add( m_OrthographicViews[ 1 ] );
+			m_SplitContainers[ 1 ].TabIndex = 1;
+			m_SplitContainers[ 1 ].Orientation = Orientation.Horizontal;
 
-			this.Controls.Add( m_Orthographic0 );
+			m_SplitContainers[ 2 ].Dock = DockStyle.Fill;
+			m_SplitContainers[ 2 ].Location = new Point( 0, 0 );
+			m_SplitContainers[ 2 ].Panel1.Controls.Add( m_OrthographicViews[ 2 ] );
+			m_SplitContainers[ 2 ].Panel2.Controls.Add( m_PerspectiveView );
+			m_SplitContainers[ 2 ].TabIndex = 2;
+			m_SplitContainers[ 2 ].Orientation = Orientation.Horizontal;
 
-			m_Orthographic0.Dock = System.Windows.Forms.DockStyle.Fill;
-			m_Orthographic0.Location = new System.Drawing.Point( 0, 0 );
-			m_Orthographic0.Name = "Orthographic View 0";
+			m_SplitContainers[ 0 ].Dock = DockStyle.Fill;
+			m_SplitContainers[ 0 ].Location = new Point( 0, 0 );
+			m_SplitContainers[ 0 ].Panel1.Controls.Add( m_SplitContainers[ 1 ] );
+			m_SplitContainers[ 0 ].Panel2.Controls.Add( m_SplitContainers[ 2 ] );
+			m_SplitContainers[ 0 ].SplitterDistance =
+				this.ClientRectangle.Width / 4;
+			m_SplitContainers[ 0 ].TabIndex = 0;
 
-			this.components = new System.ComponentModel.Container();
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Name = "BBBEditor";
-			this.Text = "Bang Bang Banquet Editor";
-			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+			this.Controls.Add( m_SplitContainers[ 0 ] );
+
+			this.components = new System.ComponentModel.Container( );
+			this.AutoScaleMode = AutoScaleMode.Font;
+			this.Name = "BloodBulletEditor";
+			this.Text = "Blood Bullet Editor";
+			this.WindowState = FormWindowState.Maximized;
+			m_SplitContainers[ 0 ].Panel1.ResumeLayout( false );
+			m_SplitContainers[ 0 ].Panel2.ResumeLayout( false );
+			m_SplitContainers[ 0 ].ResumeLayout( false );
 			this.ResumeLayout( false );
 		}
 
@@ -50,9 +100,11 @@
 			this.Close( );
 		}
 
-		private OrthographicViewControl m_Orthographic0;
-		private System.Windows.Forms.MainMenu	m_MainMenu;
-		private System.Windows.Forms.MenuItem	m_FileMenu;
-		private System.Windows.Forms.MenuItem	m_FileExit;
+		private OrthographicViewControl	[ ] m_OrthographicViews;
+		private PerspectiveViewControl	m_PerspectiveView;
+		private MainMenu				m_MainMenu;
+		private MenuItem				m_FileMenu;
+		private MenuItem				m_FileExit;
+		private SplitContainer			[ ] m_SplitContainers;
 	}
 }
