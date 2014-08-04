@@ -21,21 +21,28 @@ namespace BloodBulletEditor
 
 			m_ClearColour = new Color( 32, 32, 32 );
 
+			m_YPos = 0.0f;
+			m_XPos = 0.0f;
+			m_ZPos = 0.0f;
+
 			switch( m_ViewPlane )
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
 					this.Name = "Orthographic View [Front]";
+					m_ZPos = 1.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
 					this.Name = "Orthographic View [Top]";
+					m_YPos = 1.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
 					this.Name = "Orthographic View [Side]";
+					m_XPos = 1.0f;
 					break;
 				}
 				default:
@@ -44,6 +51,7 @@ namespace BloodBulletEditor
 				}
 			}
 
+			m_MouseWheelDelta = 0;
 		}
 
 		protected override int Initialise( )
@@ -79,20 +87,66 @@ namespace BloodBulletEditor
 
 			for( Row = 0; Row < 100*2; ++Row )
 			{
-				Vertices[ Row ] = new Vector3( ColumnStart, RowIndex, 0.0f );
-				++Row;
-				Vertices[ Row ] = new Vector3( -ColumnStart, RowIndex, 0.0f );
+				switch( m_ViewPlane )
+				{
+					case VIEWPLANE.VIEWPLANE_XY:
+					{
+						Vertices[ Row ] = new Vector3( ColumnStart, RowIndex, 0.0f );
+						++Row;
+						Vertices[ Row ] = new Vector3( -ColumnStart, RowIndex, 0.0f );
+						break;
+					}
+					case VIEWPLANE.VIEWPLANE_XZ:
+					{
+						Vertices[ Row ] = new Vector3( RowIndex, 0.0f, ColumnStart );
+						++Row;
+						Vertices[ Row ] = new Vector3( RowIndex, 0.0f, -ColumnStart );
+						break;
+					}
+					case VIEWPLANE.VIEWPLANE_YZ:
+					{
+						Vertices[ Row ] = new Vector3( 0.0f, ColumnStart, RowIndex );
+						++Row;
+						Vertices[ Row ] = new Vector3( 0.0f, -ColumnStart, RowIndex );
+						break;
+					}
+				}
 
 				RowIndex += Stride;
 			}
 
 			for( int Column = 0; Column < 100*2; ++Column )
 			{
-				Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-					RowStart, 0.0f );
-				++Column;
-				Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-					-RowStart, 0.0f );
+				switch( m_ViewPlane )
+				{
+					case VIEWPLANE.VIEWPLANE_XY:
+					{
+						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+							RowStart, 0.0f );
+						++Column;
+						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+							-RowStart, 0.0f );
+						break;
+					}
+					case VIEWPLANE.VIEWPLANE_XZ:
+					{
+						Vertices[ Row + Column ] = new Vector3( RowStart,
+							0.0f, ColumnIndex );
+						++Column;
+						Vertices[ Row + Column ] = new Vector3( -RowStart,
+							0.0f, ColumnIndex );
+						break;
+					}
+					case VIEWPLANE.VIEWPLANE_YZ:
+					{
+						Vertices[ Row + Column ] = new Vector3( 0.0f,
+							ColumnIndex, RowStart );
+						++Column;
+						Vertices[ Row + Column ] = new Vector3( 0.0f,
+							ColumnIndex, -RowStart );
+						break;
+					}
+				}
 				
 				ColumnIndex += Stride;
 			}
@@ -101,7 +155,7 @@ namespace BloodBulletEditor
 
 			for( int i = 0; i < 100*4; ++i )
 			{
-				m_Vertices[ i ].Color = Color.White; 
+				m_Vertices[ i ].Color = Color.White;
 				m_Vertices[ i ].Position = Vertices[ i ];
 			}
 
@@ -111,12 +165,7 @@ namespace BloodBulletEditor
 
 			m_VertexBuffer.SetData< VertexPositionColor >( m_Vertices );
 
-			m_YPos = 0.0f;
-			m_XPos = 0.0f;
-			m_ZPos = 0.0f;
-
 			m_Scale = 1.0f;
-			m_ScaleAdd = 0.001f;
 
 			return 0;
 		}
@@ -134,27 +183,14 @@ namespace BloodBulletEditor
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
-					m_ZPos = 1.0f;
-					if( m_Scale > 10.0f )
-					{
-						m_ScaleAdd = -0.001f;
-					}
-					if( m_Scale < 0.1f )
-					{
-						m_ScaleAdd = 0.001f;
-					}
-
-					m_Scale += m_ScaleAdd;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
-					m_YPos = 1.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
-					m_XPos = 1.0f;
 					break;
 				}
 				default:
@@ -162,6 +198,8 @@ namespace BloodBulletEditor
 					break;
 				}
 			}
+
+			m_Scale += m_ScaleAdd;
 
 			GraphicsDevice.SetVertexBuffer( m_VertexBuffer );
 
@@ -181,6 +219,8 @@ namespace BloodBulletEditor
 
 				GraphicsDevice.DrawPrimitives( PrimitiveType.LineList, 0, 200 );
 			}
+
+			m_ScaleAdd = 0.0f;
 		}
 
 		public VIEWPLANE ViewPlane
@@ -195,14 +235,37 @@ namespace BloodBulletEditor
 			}
 		}
 
-		private VIEWPLANE m_ViewPlane;
-		private BasicEffect m_Effect;
-		private VertexBuffer m_VertexBuffer;
-		private VertexDeclaration m_VertexDeclaration;
-		private VertexPositionColor [ ] m_Vertices;
-		private Matrix		m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix;
-		float m_YPos, m_XPos, m_ZPos;
-		float m_Scale;
-		float m_ScaleAdd;
+		protected override void OnMouseWheel( MouseEventArgs p_Args )
+		{
+			if( p_Args.Delta > 0 )
+			{
+				m_ScaleAdd = 0.01f;
+			}
+			if( p_Args.Delta < 0 )
+			{
+				m_ScaleAdd = -0.01f;
+			}
+		}
+
+		protected override void OnMouseDown( MouseEventArgs p_Args )
+		{
+			if( p_Args.Button == System.Windows.Forms.MouseButtons.Middle )
+			{
+				// Set grab
+			}
+		}
+
+		private VIEWPLANE			m_ViewPlane;
+		private BasicEffect			m_Effect;
+		private VertexBuffer		m_VertexBuffer;
+		private VertexDeclaration	m_VertexDeclaration;
+		private VertexPositionColor	[ ] m_Vertices;
+		private Matrix				m_WorldMatrix;
+		private Matrix				m_ViewMatrix;
+		private Matrix				m_ProjectionMatrix;
+		private float				m_YPos, m_XPos, m_ZPos;
+		private float				m_Scale;
+		private float				m_ScaleAdd;
+		private int					m_MouseWheelDelta;
 	}
 }
