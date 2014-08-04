@@ -199,7 +199,7 @@ namespace BloodBulletEditor
 			}
 
 			m_VertexBuffer = new VertexBuffer( m_GraphicsDevice,
-				typeof( VertexPositionColor ), ( p_Width * p_Height * 4 ) + 4,
+				typeof( VertexPositionColor ), ( p_Width * p_Height * 2 ) + 4,
 				BufferUsage.None );
 
 			m_VertexBuffer.SetData< VertexPositionColor >( m_Vertices );

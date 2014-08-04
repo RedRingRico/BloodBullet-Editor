@@ -64,7 +64,7 @@ namespace BloodBulletEditor
 			m_ZDelta = 0.0f;
 
 			m_Grid = new Grid( this.GraphicsDevice );
-			m_Grid.Create( m_ViewPlane, 500, 500, 10.0f, 0.0f,
+			m_Grid.Create( m_ViewPlane, 1000, 1000, 10.0f, 0.0f,
 				new Color( 32, 32, 128 ), 10, Color.Blue );
 
 			return 0;
