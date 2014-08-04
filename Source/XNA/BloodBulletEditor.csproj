@@ -59,6 +59,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="GraphicsDeviceService.cs" />
+    <Compile Include="Grid.cs" />
     <Compile Include="OrthographicViewControl.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -58,207 +58,14 @@ namespace BloodBulletEditor
 		{
 			Application.Idle += delegate { Invalidate( ); };
 
-			m_Effect = new BasicEffect( this.GraphicsDevice );
-			m_Effect.Alpha = 1.0f;
-			m_Effect.LightingEnabled = false;
-			m_Effect.VertexColorEnabled = true;
-
-			m_VertexDeclaration = new VertexDeclaration( new VertexElement [ ]
-				{
-					new VertexElement( 0, VertexElementFormat.Vector3,
-						VertexElementUsage.Position, 0 ),
-					new VertexElement( 12, VertexElementFormat.Vector3,
-						VertexElementUsage.Color, 0 )
-				}
-				);
-
-			// Create a 100x100 grid, spaced 10 units apart
-			float Stride = 10.0f;
-			Vector3 [ ] Vertices = new Vector3[ 1000*4 + 4 ];
-			float HalfRows = 1000 / 2;
-			float HalfColumns = 1000 / 2;
-			float RowStart = -HalfRows * Stride;
-			float ColumnStart = -HalfColumns * Stride;
-			float RowIndex = RowStart;
-			float ColumnIndex = ColumnStart;
-			int Row = 0;
-			int Column = 0;
-
-			for( Row = 0; Row < 1000*2; ++Row )
-			{
-				switch( m_ViewPlane )
-				{
-					case VIEWPLANE.VIEWPLANE_XY:
-					{
-						Vertices[ Row ] = new Vector3( ColumnStart, RowIndex, 0.0f );
-						++Row;
-						Vertices[ Row ] = new Vector3( -ColumnStart, RowIndex, 0.0f );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_XZ:
-					{
-						/*Vertices[ Row ] = new Vector3( RowIndex, 0.0f, ColumnStart );
-						++Row;
-						Vertices[ Row ] = new Vector3( RowIndex, 0.0f, -ColumnStart );*/
-						Vertices[ Row ] = new Vector3( ColumnStart, 0.0f, RowIndex );
-						++Row;
-						Vertices[ Row ] = new Vector3( -ColumnStart, 0.0f, RowIndex );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_YZ:
-					{
-						Vertices[ Row ] = new Vector3( 0.0f, RowIndex, ColumnStart );
-						++Row;
-						Vertices[ Row ] = new Vector3( 0.0f, RowIndex, -ColumnStart );
-						break;
-					}
-				}
-
-				RowIndex += Stride;
-			}
-
-			// Add one final row edge
-			switch( m_ViewPlane )
-			{
-				case VIEWPLANE.VIEWPLANE_XY:
-				{
-					Vertices[ Row ] = new Vector3( ColumnStart, RowIndex, 0.0f );
-					++Row;
-					Vertices[ Row ] = new Vector3( -ColumnStart, RowIndex, 0.0f );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_XZ:
-				{
-					Vertices[ Row ] = new Vector3( RowIndex, 0.0f, ColumnStart );
-					++Row;
-					Vertices[ Row ] = new Vector3( RowIndex, 0.0f, -ColumnStart );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_YZ:
-				{
-					Vertices[ Row ] = new Vector3( 0.0f, RowIndex, ColumnStart );
-					++Row;
-					Vertices[ Row ] = new Vector3( 0.0f, RowIndex, -ColumnStart );
-					break;
-				}
-			}
-
-			++Row;
-
-			for( Column = 0; Column < 1000*2; ++Column )
-			{
-				switch( m_ViewPlane )
-				{
-					case VIEWPLANE.VIEWPLANE_XY:
-					{
-						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-							RowStart, 0.0f );
-						++Column;
-						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-							-RowStart, 0.0f );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_XZ:
-					{
-						Vertices[ Row + Column ] = new Vector3( RowStart,
-							0.0f, ColumnIndex );
-						++Column;
-						Vertices[ Row + Column ] = new Vector3( -RowStart,
-							0.0f, ColumnIndex );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_YZ:
-					{
-						Vertices[ Row + Column ] = new Vector3( 0.0f,
-							RowStart, ColumnIndex );
-						++Column;
-						Vertices[ Row + Column ] = new Vector3( 0.0f,
-							-RowStart, ColumnIndex );
-						break;
-					}
-				}
-				
-				ColumnIndex += Stride;
-			}
-
-			switch( m_ViewPlane )
-			{
-				case VIEWPLANE.VIEWPLANE_XY:
-				{
-					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-						RowStart, 0.0f );
-					++Column;
-					Vertices[ Row + Column ] = new Vector3( ColumnIndex, 
-						-RowStart, 0.0f );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_XZ:
-				{
-					Vertices[ Row + Column ] = new Vector3( RowStart,
-						0.0f, ColumnIndex );
-					++Column;
-					Vertices[ Row + Column ] = new Vector3( -RowStart,
-						0.0f, ColumnIndex );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_YZ:
-				{
-					Vertices[ Row + Column ] = new Vector3( 0.0f,
-						RowStart, ColumnIndex );
-					++Column;
-					Vertices[ Row + Column ] = new Vector3( 0.0f,
-						-RowStart, ColumnIndex );
-					break;
-				}
-			}
-
-			m_Vertices = new VertexPositionColor[ 1000*4 + 4 ];
-
-			int LineCount = 0;
-
-			for( int i = 0; i < 1000*2 + 2; ++i )
-			{
-				m_Vertices[ i ].Position = Vertices[ i ];
-				if( ( i % 20 ) == 0 )
-				{
-					m_Vertices[ i ].Color = new Color( 0, 0, 255 );
-					m_Vertices[ i + 1 ].Color = new Color( 0, 0, 255 );
-					++i;
-					++LineCount;
-					m_Vertices[ i ].Position = Vertices[ i ];
-				}
-				else
-				{
-					m_Vertices[ i ].Color = new Color( 32, 32, 128 );
-				}
-				++LineCount;
-			}
-			for( int i = 0; i < 1000*2 + 2; ++i )
-			{
-				m_Vertices[ i + LineCount ].Position = Vertices[ i + LineCount ];
-				if( ( i % 20 ) == 0 )
-				{
-					m_Vertices[ i + LineCount ].Color = new Color( 0, 0, 255 );
-					m_Vertices[ i + LineCount + 1 ].Color = new Color( 0, 0, 255 );
-					++i;
-					m_Vertices[ i + LineCount ].Position = Vertices[ i + LineCount ];
-				}
-				else
-				{
-					m_Vertices[ i + LineCount ].Color = new Color( 32, 32, 128 );
-				}
-			}
-
-			m_VertexBuffer = new VertexBuffer( GraphicsDevice,
-				typeof( VertexPositionColor ),
-				4004, BufferUsage.None );
-
-			m_VertexBuffer.SetData< VertexPositionColor >( m_Vertices );
-
 			m_Scale = 1.0f;
 			m_XDelta = 0.0f;
 			m_YDelta = 0.0f;
 			m_ZDelta = 0.0f;
+
+			m_Grid = new Grid( this.GraphicsDevice );
+			m_Grid.Create( m_ViewPlane, 500, 500, 10.0f, 0.0f,
+				new Color( 32, 32, 128 ), 10, Color.Blue );
 
 			return 0;
 		}
@@ -336,24 +143,9 @@ namespace BloodBulletEditor
 				m_Scale = 30.0f;
 			}
 
-			GraphicsDevice.SetVertexBuffer( m_VertexBuffer );
-
 			m_WorldMatrix = Matrix.CreateScale( m_Scale );
 
-			m_Effect.View = m_ViewMatrix;
-			m_Effect.Projection = m_ProjectionMatrix;
-			m_Effect.World = m_WorldMatrix;
-
-			RasterizerState RasterState = new RasterizerState( );
-			RasterState.CullMode = CullMode.None;
-			GraphicsDevice.RasterizerState = RasterState;
-			
-			foreach( EffectPass Pass in m_Effect.CurrentTechnique.Passes )
-			{
-				Pass.Apply( );
-
-				GraphicsDevice.DrawPrimitives( PrimitiveType.LineList, 0, 2002 );
-			}
+			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
 
 			m_ScaleAdd = 0.0f;
 			m_XDelta = 0.0f;
@@ -459,10 +251,6 @@ namespace BloodBulletEditor
 		}
 
 		private VIEWPLANE			m_ViewPlane;
-		private BasicEffect			m_Effect;
-		private VertexBuffer		m_VertexBuffer;
-		private VertexDeclaration	m_VertexDeclaration;
-		private VertexPositionColor	[ ] m_Vertices;
 		private Matrix				m_WorldMatrix;
 		private Matrix				m_ViewMatrix;
 		private Matrix				m_ProjectionMatrix;
@@ -472,5 +260,6 @@ namespace BloodBulletEditor
 		private float				m_XDelta, m_YDelta, m_ZDelta;
 		private float				m_MouseX, m_MouseY;
 		private bool				m_MiddleButtonDown;
+		private Grid				m_Grid;
 	}
 }
