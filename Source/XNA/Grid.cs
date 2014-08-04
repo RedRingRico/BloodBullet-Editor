@@ -107,11 +107,11 @@ namespace BloodBulletEditor
 					}
 					case VIEWPLANE.VIEWPLANE_XZ:
 					{
-						Vertices[ Row + Column ] = new Vector3( RowStart,
-							0.0f, ColumnIndex );
+						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+							0.0f, RowStart );
 						++Column;
-						Vertices[ Row + Column ] = new Vector3( -RowStart,
-							0.0f, ColumnIndex );
+						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+							0.0f, -RowStart );
 						break;
 					}
 					case VIEWPLANE.VIEWPLANE_YZ:
@@ -142,11 +142,11 @@ namespace BloodBulletEditor
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
-					Vertices[ Row + Column ] = new Vector3( RowStart,
-						0.0f, ColumnIndex );
+					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+						0.0f, RowStart );
 					++Column;
-					Vertices[ Row + Column ] = new Vector3( -RowStart,
-						0.0f, ColumnIndex );
+					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+						0.0f, -RowStart );
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:

@@ -77,6 +77,7 @@ namespace BloodBulletEditor
 				1.0f, 1000000.0f );
 
 			Vector3 LookPoint = new Vector3( 0.0f, 0.0f, 0.0f );
+			Vector3 Up = Vector3.Up;
 
 			switch( m_ViewPlane )
 			{
@@ -92,6 +93,7 @@ namespace BloodBulletEditor
 					LookPoint.X = m_XPos;
 					LookPoint.Y = 0.0f;
 					LookPoint.Z = m_ZPos;
+					Up = Vector3.Forward;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
@@ -102,9 +104,9 @@ namespace BloodBulletEditor
 					break;
 				}
 			}
-				
+
 			m_ViewMatrix = Matrix.CreateLookAt(
-				new Vector3( m_XPos, m_YPos, m_ZPos ), LookPoint, Vector3.Up );
+				new Vector3( m_XPos, m_YPos, m_ZPos ), LookPoint, Up );
 
 			switch( m_ViewPlane )
 			{
@@ -232,8 +234,8 @@ namespace BloodBulletEditor
 					}
 					case VIEWPLANE.VIEWPLANE_XZ:
 					{
-						m_XDelta = ( p_Args.X - m_MouseX ) * m_Scale;
-						m_ZDelta = ( p_Args.Y - m_MouseY ) * m_Scale;
+						m_XDelta = -( p_Args.X - m_MouseX ) * m_Scale;
+						m_ZDelta = -( p_Args.Y - m_MouseY ) * m_Scale;
 						m_MouseX = p_Args.X;
 						m_MouseY = p_Args.Y;
 						break;
