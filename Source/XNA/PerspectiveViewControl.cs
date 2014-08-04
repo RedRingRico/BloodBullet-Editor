@@ -12,7 +12,7 @@ namespace BloodBulletEditor
 		{
 			Application.Idle += delegate { Invalidate( ); };
 
-			m_ClearColour = Microsoft.Xna.Framework.Color.CornflowerBlue;
+			m_ClearColour = Microsoft.Xna.Framework.Color.Black;
 
 			return 0;
 		}
