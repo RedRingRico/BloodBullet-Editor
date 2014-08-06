@@ -25,6 +25,8 @@ namespace BloodBulletEditor
 			m_XPos = 0.0f;
 			m_ZPos = 0.0f;
 
+			m_WorldScale = 1.0f;
+
 			switch( m_ViewPlane )
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
@@ -105,6 +107,8 @@ namespace BloodBulletEditor
 				}
 			}
 
+			System.Diagnostics.Debug.WriteLine( "Scale = " + m_Scale );
+
 			m_ViewMatrix = Matrix.CreateLookAt(
 				new Vector3( m_XPos, m_YPos, m_ZPos ), LookPoint, Up );
 
@@ -145,7 +149,23 @@ namespace BloodBulletEditor
 				m_Scale = 30.0f;
 			}
 
-			m_WorldMatrix = Matrix.CreateScale( m_Scale );
+			if( m_Scale >= 8.0f )
+			{
+				m_Label.Text = this.Name + " [cm]";
+				m_WorldScale = 0.1f;
+			}
+			else if( m_Scale <= 0.6699997f )
+			{
+				m_Label.Text = this.Name + " [1m]";
+				m_WorldScale = 10.0f;
+			}
+			else
+			{
+				m_Label.Text = this.Name + " [10cm]";
+				m_WorldScale = 1.0f;
+			}
+
+			m_WorldMatrix = Matrix.CreateScale( m_Scale * m_WorldScale );
 
 			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
 
@@ -226,8 +246,10 @@ namespace BloodBulletEditor
 				{
 					case VIEWPLANE.VIEWPLANE_XY:
 					{
-						m_XDelta = ( p_Args.X - m_MouseX ) * m_Scale;
-						m_YDelta = ( p_Args.Y - m_MouseY ) * m_Scale;
+						m_XDelta = ( p_Args.X - m_MouseX ) * m_Scale *
+							m_WorldScale;
+						m_YDelta = ( p_Args.Y - m_MouseY ) * m_Scale *
+							m_WorldScale;
 						m_MouseX = p_Args.X;
 						m_MouseY = p_Args.Y;
 						break;
@@ -262,6 +284,7 @@ namespace BloodBulletEditor
 		private float				m_XDelta, m_YDelta, m_ZDelta;
 		private float				m_MouseX, m_MouseY;
 		private bool				m_MiddleButtonDown;
+		private float				m_WorldScale;
 		private Grid				m_Grid;
 	}
 }

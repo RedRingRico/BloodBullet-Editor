@@ -17,7 +17,7 @@ namespace BloodBulletEditor
 			m_ClearColour = Microsoft.Xna.Framework.Color.Black;
 
 			m_Grid = new Grid( this.GraphicsDevice );
-			m_Grid.Create( VIEWPLANE.VIEWPLANE_XZ, 1000, 1000, 10.0f, 0.0f,
+			m_Grid.Create( VIEWPLANE.VIEWPLANE_XZ, 100, 100, 100.0f, 0.0f,
 				new Color( 32, 32, 128 ), 10, Color.Blue );
 
 			return 0;
@@ -30,7 +30,7 @@ namespace BloodBulletEditor
 				1.0f, 100000.0f );
 
 			m_ViewMatrix = Matrix.CreateLookAt(
-				new Vector3( 10.0f, 50.0f, 70.0f ),
+				new Vector3( 10.0f, 100.0f, 100.0f ),
 				Vector3.Zero, Vector3.Up );
 
 			m_WorldMatrix = Matrix.Identity;

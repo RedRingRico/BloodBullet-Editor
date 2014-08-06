@@ -9,7 +9,7 @@ namespace BloodBulletEditor
 	{
 		GraphicsDeviceService	m_GraphicsDeviceService;
 		ServiceContainer		m_Services = new ServiceContainer( );
-		private Label			m_Label = new Label( );
+		protected Label			m_Label = new Label( );
 
 		protected Microsoft.Xna.Framework.Color	m_ClearColour;
 
