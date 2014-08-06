@@ -34,133 +34,42 @@ namespace BloodBulletEditor
 			int Column = 0;
 			m_ViewPlane = p_Type;
 
+			m_ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
+
 			for( Row = 0; Row < p_Height * 2; ++Row )
 			{
-				switch( m_ViewPlane )
-				{
-					case VIEWPLANE.VIEWPLANE_XY:
-					{
-						Vertices[ Row ] = new Vector3( ColumnStart, RowIndex, 0.0f );
-						++Row;
-						Vertices[ Row ] = new Vector3( -ColumnStart, RowIndex, 0.0f );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_XZ:
-					{
-						Vertices[ Row ] = new Vector3( ColumnStart, 0.0f, RowIndex );
-						++Row;
-						Vertices[ Row ] = new Vector3( -ColumnStart, 0.0f, RowIndex );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_YZ:
-					{
-						Vertices[ Row ] = new Vector3( 0.0f, RowIndex, ColumnStart );
-						++Row;
-						Vertices[ Row ] = new Vector3( 0.0f, RowIndex, -ColumnStart );
-						break;
-					}
-				}
+				Vertices[ Row ] = new Vector3( ColumnStart, 0.0f, RowIndex );
+					++Row;
+				Vertices[ Row ] = new Vector3( -ColumnStart, 0.0f, RowIndex );
 
 				RowIndex += p_Stride;
 			}
 
 			// Add the last edge to the row
-			switch( m_ViewPlane )
-			{
-				case VIEWPLANE.VIEWPLANE_XY:
-				{
-					Vertices[ Row ] = new Vector3( ColumnStart, RowIndex, 0.0f );
-					++Row;
-					Vertices[ Row ] = new Vector3( -ColumnStart, RowIndex, 0.0f );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_XZ:
-				{
-					Vertices[ Row ] = new Vector3( RowIndex, 0.0f, ColumnStart );
-					++Row;
-					Vertices[ Row ] = new Vector3( RowIndex, 0.0f, -ColumnStart );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_YZ:
-				{
-					Vertices[ Row ] = new Vector3( 0.0f, RowIndex, ColumnStart );
-					++Row;
-					Vertices[ Row ] = new Vector3( 0.0f, RowIndex, ColumnStart );
-					break;
-				}
-			}
-
+			Vertices[ Row ] = new Vector3( ColumnStart, 0.0f, RowIndex );
+			++Row;
+			Vertices[ Row ] = new Vector3( -ColumnStart, 0.0f, RowIndex );
 			++Row;
 
 			for( Column = 0; Column < p_Width * 2; ++Column )
 			{
-				switch( m_ViewPlane )
-				{
-					case VIEWPLANE.VIEWPLANE_XY:
-					{
-						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-							RowStart, 0.0f );
-						++Column;
-						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-							-RowStart, 0.0f );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_XZ:
-					{
-						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-							0.0f, RowStart );
-						++Column;
-						Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-							0.0f, -RowStart );
-						break;
-					}
-					case VIEWPLANE.VIEWPLANE_YZ:
-					{
-						Vertices[ Row + Column ] = new Vector3( 0.0f,
-							RowStart, ColumnIndex );
-						++Column;
-						Vertices[ Row + Column ] = new Vector3( 0.0f,
-							-RowStart, ColumnIndex );
-						break;
-					}
-				}
+				Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+					0.0f, RowStart );
+				++Column;
+				Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+					0.0f, -RowStart );
 
 				ColumnIndex += p_Stride;
 			}
 
 			// Add the last edge to the column
-			switch( m_ViewPlane )
-			{
-				case VIEWPLANE.VIEWPLANE_XY:
-				{
-					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-						RowStart, 0.0f );
-					++Column;
-					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-						-RowStart, 0.0f );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_XZ:
-				{
-					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-						0.0f, RowStart );
-					++Column;
-					Vertices[ Row + Column ] = new Vector3( ColumnIndex,
-						0.0f, -RowStart );
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_YZ:
-				{
-					Vertices[ Row + Column ] = new Vector3( 0.0f,
-						RowStart, ColumnIndex );
-					++Column;
-					Vertices[ Row + Column ] = new Vector3( 0.0f,
-						-RowStart, ColumnIndex );
-					break;
-				}
-			}
+			Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+				0.0f, RowStart );
+			++Column;
+			Vertices[ Row + Column ] = new Vector3( ColumnIndex,
+				0.0f, -RowStart );
 
-			m_Vertices = new VertexPositionColor[ p_Width * p_Height * 2 ];
+			m_Vertices = new VertexPositionColor[ ( ( p_Width + p_Height ) * 2 ) + 4];
 
 			int LineCount = 0;
 
@@ -199,17 +108,35 @@ namespace BloodBulletEditor
 			}
 
 			m_VertexBuffer = new VertexBuffer( m_GraphicsDevice,
-				typeof( VertexPositionColor ), ( p_Width * p_Height * 2 ) + 4,
+				typeof( VertexPositionColor ), ( ( p_Width + p_Height ) * 2 ) + 4,
 				BufferUsage.None );
 
 			m_VertexBuffer.SetData< VertexPositionColor >( m_Vertices );
+
+			m_ViewPlane = p_Type;
+			m_TotalWidth = p_Width * p_Stride;
+			m_TotalHeight = p_Height * p_Stride;
 
 			return 0;
 		}
 
 		public void Render( Matrix p_World, Matrix p_View, Matrix p_Projection )
 		{
-			m_Effect.World = p_World;
+			Matrix Rotation = Matrix.Identity;
+			switch( m_ViewPlane )
+			{
+				case VIEWPLANE.VIEWPLANE_XY:
+				{
+					Rotation = Matrix.CreateRotationX( (float )Math.PI/2.0f );
+					break;
+				}
+				case VIEWPLANE.VIEWPLANE_YZ:
+				{
+					Rotation = Matrix.CreateRotationZ( (float )Math.PI/2.0f );
+						break;
+				}
+			}
+			m_Effect.World = p_World * Rotation;
 			m_Effect.View = p_View;
 			m_Effect.Projection = p_Projection;
 
@@ -238,10 +165,24 @@ namespace BloodBulletEditor
 			}
 		}
 
+		public VIEWPLANE ViewPlane
+		{
+			get
+			{
+				return m_ViewPlane;
+			}
+			set
+			{
+				m_ViewPlane = value;
+			}
+		}
+
 		private VIEWPLANE			m_ViewPlane;
 		private BasicEffect			m_Effect;
 		private VertexBuffer		m_VertexBuffer;
 		private VertexPositionColor	[ ] m_Vertices;
 		private GraphicsDevice		m_GraphicsDevice;
+		private float				m_TotalWidth;
+		private float				m_TotalHeight;
 	}
 }

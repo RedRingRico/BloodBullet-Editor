@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace BloodBulletEditor
 {
@@ -21,9 +22,7 @@ namespace BloodBulletEditor
 
 			m_ClearColour = new Color( 32, 32, 32 );
 
-			m_YPos = 0.0f;
-			m_XPos = 0.0f;
-			m_ZPos = 0.0f;
+			m_CameraPosition = Vector3.Zero;
 
 			m_WorldScale = 1.0f;
 
@@ -32,19 +31,19 @@ namespace BloodBulletEditor
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
 					this.Name = "Orthographic View [Front]";
-					m_ZPos = -1.0f;
+					m_CameraPosition.Z = -1.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
 					this.Name = "Orthographic View [Top]";
-					m_YPos = 1.0f;
+					m_CameraPosition.Y = 1.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
 					this.Name = "Orthographic View [Side]";
-					m_XPos = 1.0f;
+					m_CameraPosition.X = 1.0f;
 					break;
 				}
 				default:
@@ -54,6 +53,7 @@ namespace BloodBulletEditor
 			}
 			
 			m_MiddleButtonDown = false;
+			m_LookPoint = Vector3.Zero;
 		}
 
 		protected override int Initialise( )
@@ -66,70 +66,79 @@ namespace BloodBulletEditor
 			m_ZDelta = 0.0f;
 
 			m_Grid = new Grid( this.GraphicsDevice );
-			m_Grid.Create( m_ViewPlane, 1000, 1000, 10.0f, 0.0f,
+			m_Grid.Create( m_ViewPlane, 20, 20, 10.0f, 0.0f,
 				new Color( 32, 32, 128 ), 10, Color.Blue );
 
+			MenuItem [] Test = new MenuItem[ 1 ];
+			Test[ 0 ] = new MenuItem( "TEST", TestMenuItem_Click );
+			m_ContextMenu = new ContextMenu( Test );
+
+			this.ContextMenu = m_ContextMenu;
+
 			return 0;
+		}
+
+		private void TestMenuItem_Click( object p_Sender, EventArgs p_Args )
+		{
+			this.m_ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
+			this.Name = "Orthographic View [Top] from context menu";
+			m_CameraPosition.Y = 1.0f;
+			m_CameraPosition.X = 0.0f;
+			m_CameraPosition.Z = 0.0f;
+			m_Grid.ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
 		}
 
 		protected override void Draw( )
 		{
 			m_ProjectionMatrix = Matrix.CreateOrthographic(
 				GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
-				1.0f, 1000000.0f );
+				0.1f, 1000000.0f );
 
-			Vector3 LookPoint = new Vector3( 0.0f, 0.0f, 0.0f );
 			Vector3 Up = Vector3.Up;
+
+			m_LookPoint = m_CameraPosition;
 
 			switch( m_ViewPlane )
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
-					LookPoint.X = m_XPos;
-					LookPoint.Y = m_YPos;
-					LookPoint.Z = 0.0f;
+					m_LookPoint.Z = 0.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
-					LookPoint.X = m_XPos;
-					LookPoint.Y = 0.0f;
-					LookPoint.Z = m_ZPos;
+					m_LookPoint.Y = 0.0f;
 					Up = Vector3.Forward;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
-					LookPoint.X = 0.0f;
-					LookPoint.Y = m_YPos;
-					LookPoint.Z = m_ZPos;
+					m_LookPoint.X = 0.0f;
 					break;
 				}
 			}
 
-			System.Diagnostics.Debug.WriteLine( "Scale = " + m_Scale );
-
-			m_ViewMatrix = Matrix.CreateLookAt(
-				new Vector3( m_XPos, m_YPos, m_ZPos ), LookPoint, Up );
+			m_ViewMatrix = Matrix.CreateLookAt( m_CameraPosition * m_Scale,
+				m_LookPoint * m_Scale, Up );
 
 			switch( m_ViewPlane )
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
-					m_XPos += m_XDelta;
-					m_YPos += m_YDelta;
+					m_CameraPosition.X += m_XDelta;
+					m_CameraPosition.Y += m_YDelta;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
-					m_XPos += m_XDelta;
-					m_ZPos += m_ZDelta;
+					m_CameraPosition.X += m_XDelta;
+					m_CameraPosition.Z += m_ZDelta;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
-					m_YPos += m_YDelta;
-					m_ZPos += m_ZDelta;
+					m_CameraPosition.Y += m_YDelta;
+					m_CameraPosition.Z += m_ZDelta;
 					break;
 				}
 				default:
@@ -246,26 +255,24 @@ namespace BloodBulletEditor
 				{
 					case VIEWPLANE.VIEWPLANE_XY:
 					{
-						m_XDelta = ( p_Args.X - m_MouseX ) * m_Scale *
-							m_WorldScale;
-						m_YDelta = ( p_Args.Y - m_MouseY ) * m_Scale *
-							m_WorldScale;
+						m_XDelta = ( p_Args.X - m_MouseX );
+						m_YDelta = ( p_Args.Y - m_MouseY );
 						m_MouseX = p_Args.X;
 						m_MouseY = p_Args.Y;
 						break;
 					}
 					case VIEWPLANE.VIEWPLANE_XZ:
 					{
-						m_XDelta = -( p_Args.X - m_MouseX ) * m_Scale;
-						m_ZDelta = -( p_Args.Y - m_MouseY ) * m_Scale;
+						m_XDelta = -( p_Args.X - m_MouseX );
+						m_ZDelta = -( p_Args.Y - m_MouseY );
 						m_MouseX = p_Args.X;
 						m_MouseY = p_Args.Y;
 						break;
 					}
 					case VIEWPLANE.VIEWPLANE_YZ:
 					{
-						m_YDelta = ( p_Args.Y - m_MouseY ) * m_Scale;
-						m_ZDelta = ( p_Args.X - m_MouseX ) * m_Scale;
+						m_YDelta = ( p_Args.Y - m_MouseY );
+						m_ZDelta = ( p_Args.X - m_MouseX );
 						m_MouseX = p_Args.X;
 						m_MouseY = p_Args.Y;
 						break;
@@ -278,7 +285,7 @@ namespace BloodBulletEditor
 		private Matrix				m_WorldMatrix;
 		private Matrix				m_ViewMatrix;
 		private Matrix				m_ProjectionMatrix;
-		private float				m_YPos, m_XPos, m_ZPos;
+		private Vector3				m_CameraPosition;
 		private float				m_Scale;
 		private float				m_ScaleAdd;
 		private float				m_XDelta, m_YDelta, m_ZDelta;
@@ -286,5 +293,7 @@ namespace BloodBulletEditor
 		private bool				m_MiddleButtonDown;
 		private float				m_WorldScale;
 		private Grid				m_Grid;
+		private ContextMenu			m_ContextMenu;
+		private Vector3				m_LookPoint;
 	}
 }
