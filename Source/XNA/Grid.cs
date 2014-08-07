@@ -127,7 +127,7 @@ namespace BloodBulletEditor
 			{
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
-					Rotation = Matrix.CreateRotationX( (float )Math.PI/2.0f );
+					Rotation = Matrix.CreateRotationX( ( float )Math.PI/2.0f );
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:

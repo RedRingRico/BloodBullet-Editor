@@ -18,42 +18,7 @@ namespace BloodBulletEditor
 		public OrthographicViewControl( VIEWPLANE p_ViewPlane ) :
 			base( )
 		{
-			m_ViewPlane = p_ViewPlane;
-
-			m_ClearColour = new Color( 32, 32, 32 );
-
-			m_CameraPosition = Vector3.Zero;
-
-			m_WorldScale = 1.0f;
-
-			switch( m_ViewPlane )
-			{
-				case VIEWPLANE.VIEWPLANE_XY:
-				{
-					this.Name = "Orthographic View [Front]";
-					m_CameraPosition.Z = -1.0f;
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_XZ:
-				{
-					this.Name = "Orthographic View [Top]";
-					m_CameraPosition.Y = 1.0f;
-					break;
-				}
-				case VIEWPLANE.VIEWPLANE_YZ:
-				{
-					this.Name = "Orthographic View [Side]";
-					m_CameraPosition.X = 1.0f;
-					break;
-				}
-				default:
-				{
-					break;
-				}
-			}
-			
-			m_MiddleButtonDown = false;
-			m_LookPoint = Vector3.Zero;
+			this.Reset( p_ViewPlane );
 		}
 
 		protected override int Initialise( )
@@ -66,26 +31,92 @@ namespace BloodBulletEditor
 			m_ZDelta = 0.0f;
 
 			m_Grid = new Grid( this.GraphicsDevice );
-			m_Grid.Create( m_ViewPlane, 20, 20, 10.0f, 0.0f,
+			m_Grid.Create( m_ViewPlane, 1000, 1000, 10.0f, 0.0f,
 				new Color( 32, 32, 128 ), 10, Color.Blue );
 
-			MenuItem [] Test = new MenuItem[ 1 ];
-			Test[ 0 ] = new MenuItem( "TEST", TestMenuItem_Click );
-			m_ContextMenu = new ContextMenu( Test );
+			MenuItem [ ] ViewportMenu = new MenuItem[ 1 ];
+			ViewportMenu[ 0 ] = new MenuItem( "Change Viewport" );
+
+			MenuItem [ ] ViewportSubMenu = new MenuItem[ 3 ];
+			ViewportSubMenu[ 0 ] = new MenuItem( "Front",
+				ViewportSubMenu_Front_Click );
+			ViewportSubMenu[ 1 ] = new MenuItem( "Side",
+				ViewportSubMenu_Side_Click );
+			ViewportSubMenu[ 2 ] = new MenuItem( "Top",
+				ViewportSubMenu_Top_Click );
+
+			for( int i = 0; i < 3; ++i )
+			{
+				ViewportMenu[ 0 ].MenuItems.Add( ViewportSubMenu[ i ] );
+			}
+			m_ContextMenu = new ContextMenu( ViewportMenu );
 
 			this.ContextMenu = m_ContextMenu;
 
 			return 0;
 		}
 
-		private void TestMenuItem_Click( object p_Sender, EventArgs p_Args )
+		private int Reset( VIEWPLANE p_ViewPlane )
 		{
-			this.m_ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
-			this.Name = "Orthographic View [Top] from context menu";
-			m_CameraPosition.Y = 1.0f;
-			m_CameraPosition.X = 0.0f;
-			m_CameraPosition.Z = 0.0f;
-			m_Grid.ViewPlane = VIEWPLANE.VIEWPLANE_XZ;
+			m_Scale = 1.0f;
+			m_WorldScale = 1.0f;
+			m_XDelta = 0.0f;
+			m_YDelta = 0.0f;
+			m_ZDelta = 0.0f;
+
+			m_ViewPlane = p_ViewPlane;
+
+			m_CameraPosition = Vector3.Zero;
+			m_LookPoint = Vector3.Zero;
+
+			m_ClearColour = new Color( 32, 32, 32 );
+
+			switch( m_ViewPlane )
+			{
+				case VIEWPLANE.VIEWPLANE_XY:
+				{
+					this.Name = "Orthographic View [Front]";
+					m_CameraPosition.Z = -1.1f;
+					break;
+				}
+				case VIEWPLANE.VIEWPLANE_XZ:
+				{
+					this.Name = "Orthographic View [Top]";
+					m_CameraPosition.Y = 1.1f;
+					break;
+				}
+				case VIEWPLANE.VIEWPLANE_YZ:
+				{
+					this.Name = "Orthographic View [Side]";
+					m_CameraPosition.X = 1.1f;
+					break;
+				}
+			}
+			
+			m_MiddleButtonDown = false;
+
+			if( m_Grid != null )
+			{
+				m_Grid.ViewPlane = m_ViewPlane;
+			}
+
+			return 0;
+		}
+
+		private void ViewportSubMenu_Front_Click( object p_Sender,
+			EventArgs p_Args )
+		{
+			this.Reset( VIEWPLANE.VIEWPLANE_XY );
+		}
+		private void ViewportSubMenu_Side_Click( object p_Sender,
+			EventArgs p_Args )
+		{
+			this.Reset( VIEWPLANE.VIEWPLANE_YZ );
+		}
+		private void ViewportSubMenu_Top_Click( object p_Sender,
+			EventArgs p_Args )
+		{
+			this.Reset( VIEWPLANE.VIEWPLANE_XZ );
 		}
 
 		protected override void Draw( )
