@@ -2,16 +2,19 @@
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.GamerServices;
 
 namespace BloodBulletEditor
 {
 	abstract public class GraphicsDeviceControl : Control
 	{
 		GraphicsDeviceService	m_GraphicsDeviceService;
-		ServiceContainer		m_Services = new ServiceContainer( );
+		protected ServiceContainer		m_Services = new ServiceContainer( );
 		protected Label			m_Label = new Label( );
+		protected bool			m_PerspectiveView;
 
 		protected Microsoft.Xna.Framework.Color	m_ClearColour;
+
 
 		public GraphicsDevice GraphicsDevice
 		{
@@ -86,7 +89,6 @@ namespace BloodBulletEditor
 			{
 				Draw( );
 				EndDraw( );
-
 			}
 			else
 			{
@@ -130,11 +132,25 @@ namespace BloodBulletEditor
 		{
 			try
 			{
-				Microsoft.Xna.Framework.Rectangle SourceRectangle =
-					new Microsoft.Xna.Framework.Rectangle( 0, 0,
-						ClientSize.Width, ClientSize.Height );
-				
-				GraphicsDevice.Present( SourceRectangle, null, this.Handle );
+				// For the perspective, the GFWL Guide only seems to work with
+				// Present with no parameters
+				if( m_PerspectiveView )
+				{
+					GraphicsDevice.Present( );
+				}
+				else
+				{
+					Microsoft.Xna.Framework.Rectangle SourceRectangle =
+						new Microsoft.Xna.Framework.Rectangle( 0, 0,
+							ClientSize.Width, ClientSize.Height );
+
+					GraphicsDevice.Present( SourceRectangle, null, this.Handle );
+				}
+
+				if( GamerServicesDispatcher.IsInitialized )
+				{
+					GamerServicesDispatcher.Update( );
+				}
 			}
 			catch
 			{
@@ -205,6 +221,14 @@ namespace BloodBulletEditor
 
 		protected override void OnPaintBackground( PaintEventArgs p_PaintEvent )
 		{
+		}
+
+		protected override void OnMouseClick( MouseEventArgs p_Args )
+		{
+			// This is mainly for the GFWL Guide, as if the control does not
+			// have focus, it will not handle the home key correclty
+			this.Focus( );
+			base.OnMouseClick( p_Args );
 		}
 
 		protected abstract int Initialise( );

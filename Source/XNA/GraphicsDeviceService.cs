@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.GamerServices;
 
 namespace BloodBulletEditor
 {
@@ -15,6 +17,10 @@ namespace BloodBulletEditor
 
 		PresentationParameters	m_PresentationParameters;
 		GraphicsDevice			m_GraphicsDevice;
+		GameServiceContainer	m_GameServices;
+		GraphicsDeviceManager	m_GraphicsDeviceManager;
+
+		Game	m_TmpGame;
 
 		public event EventHandler< EventArgs > DeviceCreated;
 		public event EventHandler< EventArgs > DeviceDisposing;

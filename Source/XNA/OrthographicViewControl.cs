@@ -23,6 +23,7 @@ namespace BloodBulletEditor
 
 		protected override int Initialise( )
 		{
+			m_PerspectiveView = false;
 			Application.Idle += delegate { Invalidate( ); };
 
 			m_Scale = 1.0f;

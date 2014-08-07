@@ -48,7 +48,6 @@ namespace BloodBulletEditor
 			m_PerspectiveView = new PerspectiveViewControl( );
 			m_PerspectiveView.Dock = DockStyle.Fill;
 			m_PerspectiveView.Location = new Point( 0, 0 );
-			m_PerspectiveView.Name = "Perspective View";
 
 			// File sub-menu
 			m_FileMenu = new MenuItem( "&File" );
@@ -64,15 +63,16 @@ namespace BloodBulletEditor
 
 			m_SplitContainers[ 1 ].Dock = DockStyle.Fill;
 			m_SplitContainers[ 1 ].Location = new Point( 0, 0 );
-			m_SplitContainers[ 1 ].Panel1.Controls.Add( m_OrthographicViews[ 0 ] );
 			m_SplitContainers[ 1 ].Panel2.Controls.Add( m_OrthographicViews[ 1 ] );
+
+			m_SplitContainers[ 1 ].Panel1.Controls.Add( m_PerspectiveView );
 			m_SplitContainers[ 1 ].TabIndex = 1;
 			m_SplitContainers[ 1 ].Orientation = Orientation.Horizontal;
 
 			m_SplitContainers[ 2 ].Dock = DockStyle.Fill;
 			m_SplitContainers[ 2 ].Location = new Point( 0, 0 );
 			m_SplitContainers[ 2 ].Panel1.Controls.Add( m_OrthographicViews[ 2 ] );
-			m_SplitContainers[ 2 ].Panel2.Controls.Add( m_PerspectiveView );
+			m_SplitContainers[ 2 ].Panel2.Controls.Add( m_OrthographicViews[ 0 ] );
 			m_SplitContainers[ 2 ].TabIndex = 2;
 			m_SplitContainers[ 2 ].Orientation = Orientation.Horizontal;
 
@@ -80,8 +80,7 @@ namespace BloodBulletEditor
 			m_SplitContainers[ 0 ].Location = new Point( 0, 0 );
 			m_SplitContainers[ 0 ].Panel1.Controls.Add( m_SplitContainers[ 1 ] );
 			m_SplitContainers[ 0 ].Panel2.Controls.Add( m_SplitContainers[ 2 ] );
-			m_SplitContainers[ 0 ].SplitterDistance =
-				this.ClientRectangle.Width / 4;
+			m_SplitContainers[ 0 ].SplitterDistance = Width / 4;
 			m_SplitContainers[ 0 ].TabIndex = 0;
 
 			this.Controls.Add( m_SplitContainers[ 0 ] );
@@ -95,11 +94,43 @@ namespace BloodBulletEditor
 			m_SplitContainers[ 0 ].Panel2.ResumeLayout( false );
 			m_SplitContainers[ 0 ].ResumeLayout( false );
 			this.ResumeLayout( false );
+
+			RemoveCursorNavigation( this.Controls );
 		}
 
 		private void FileExit( object p_Sender, System.EventArgs p_Args )
 		{
 			this.Close( );
+		}
+
+		private void RemoveCursorNavigation(
+			Control.ControlCollection p_Controls )
+		{
+			foreach( Control Ctrl in p_Controls )
+			{
+				Ctrl.PreviewKeyDown += new PreviewKeyDownEventHandler(Ctrl_PreviewKeyDown);
+				RemoveCursorNavigation( Ctrl.Controls );
+			}
+		}
+
+		void Ctrl_PreviewKeyDown( object sender,
+			PreviewKeyDownEventArgs p_Args )
+		{
+			switch( p_Args.KeyCode )
+			{
+				case Keys.Up:
+				case Keys.Down:
+				case Keys.Left:
+				case Keys.Right:
+				{
+					p_Args.IsInputKey = false;
+					break;
+				}
+				default:
+				{
+					break;
+				}
+			}
 		}
 
 		private OrthographicViewControl	[ ] m_OrthographicViews;
