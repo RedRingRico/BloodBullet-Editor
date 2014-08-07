@@ -170,6 +170,7 @@ namespace BloodBulletEditor
 				case GraphicsDeviceStatus.NotReset:
 				{
 					DeviceNeedsReset = true;
+
 					break;
 				}
 				default:

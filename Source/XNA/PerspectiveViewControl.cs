@@ -23,10 +23,15 @@ namespace BloodBulletEditor
 			m_Grid.Create( VIEWPLANE.VIEWPLANE_XZ, 100, 100, 100.0f, 0.0f,
 				new Color( 32, 32, 128 ), 10, Color.Blue );
 
-			MenuItem [ ] PerspectiveMenu = new MenuItem[ 1 ];
+			MenuItem [ ] PerspectiveMenu = new MenuItem[ 2 ];
 			PerspectiveMenu[ 0 ] = new MenuItem( "Xbox 360 Live Edit",
 				Preview_ClickHandle );
+			PerspectiveMenu[ 1 ] = new MenuItem( "Change Clear Colour",
+				ClearColour_ClickHandle );
 			this.ContextMenu = new ContextMenu( PerspectiveMenu );
+
+
+			m_ColourPicker = new ColorDialog( );
 
 			return 0;
 		}
@@ -42,6 +47,19 @@ namespace BloodBulletEditor
 
 				// Check if the gamer signed in here and start looking for
 				// network sessions (this may require the GUID to be modified)
+			}
+		}
+
+		private void ClearColour_ClickHandle( object p_Sender,
+			EventArgs p_Args )
+		{
+			DialogResult Result = m_ColourPicker.ShowDialog( );
+
+			if( Result == DialogResult.OK )
+			{
+				m_ClearColour.R = m_ColourPicker.Color.R;
+				m_ClearColour.G = m_ColourPicker.Color.G;
+				m_ClearColour.B = m_ColourPicker.Color.B;
 			}
 		}
 
@@ -87,11 +105,11 @@ namespace BloodBulletEditor
 		// holding a modifier key while pressing the middle mouse button,
 		// similar to Blender's navigation interface
 
-		private Grid	m_Grid;
-		private Matrix	m_WorldMatrix;
-		private Matrix	m_ViewMatrix;
-		private Matrix	m_ProjectionMatrix;
-		private long	m_UpdateCount = 0;
+		private Grid			m_Grid;
+		private Matrix			m_WorldMatrix;
+		private Matrix			m_ViewMatrix;
+		private Matrix			m_ProjectionMatrix;
 		private NetworkSession	m_NetSession;
+		private ColorDialog		m_ColourPicker;
 	}
 }
