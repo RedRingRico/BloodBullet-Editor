@@ -30,8 +30,14 @@ namespace BloodBulletEditor
 				ClearColour_ClickHandle );
 			this.ContextMenu = new ContextMenu( PerspectiveMenu );
 
-
 			m_ColourPicker = new ColorDialog( );
+
+			m_SpriteBatch = new SpriteBatch( this.GraphicsDevice );
+
+			m_ScreenRender = new RenderTarget2D( this.GraphicsDevice,
+				this.Width, this.Height );
+
+			m_AspectRatio = ( float )Width / ( float )Height;
 
 			return 0;
 		}
@@ -86,9 +92,20 @@ namespace BloodBulletEditor
 
 		protected override void Draw( )
 		{
+			if( Width != m_ScreenRender.Width ||
+				Height != m_ScreenRender.Height )
+			{
+				m_ScreenRender = null;
+				m_ScreenRender = new RenderTarget2D( this.GraphicsDevice,
+					Width, Height );
+				m_AspectRatio = ( float )Width / ( float )Height;
+			}
+
+			this.GraphicsDevice.SetRenderTarget( m_ScreenRender );
+			this.GraphicsDevice.Clear( m_ClearColour );
+		  
 			m_ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-				(float)Math.PI/2.0f, this.GraphicsDevice.Viewport.AspectRatio,
-				1.0f, 100000.0f );
+				( float )Math.PI/2.0f, m_AspectRatio, 1.0f, 100000.0f );
 
 			m_ViewMatrix = Matrix.CreateLookAt(
 				new Vector3( 10.0f, 100.0f, 100.0f ),
@@ -97,6 +114,17 @@ namespace BloodBulletEditor
 			m_WorldMatrix = Matrix.Identity;
 
 			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
+			
+			this.GraphicsDevice.SetRenderTarget( null );
+
+			m_SpriteBatch.Begin( );
+			m_SpriteBatch.Draw( ( Texture2D ) m_ScreenRender,
+				new Rectangle( 0, 0, 
+				GraphicsDevice.PresentationParameters.BackBufferWidth,
+					GraphicsDevice.PresentationParameters.BackBufferHeight ),
+					new Rectangle( 0, 0, Width, Height ),
+					Color.White );
+			m_SpriteBatch.End( );
 		}	
 		// Logic to add:
 		// When the user clicks on the view (single), the viewport is treated as
@@ -111,5 +139,8 @@ namespace BloodBulletEditor
 		private Matrix			m_ProjectionMatrix;
 		private NetworkSession	m_NetSession;
 		private ColorDialog		m_ColourPicker;
+		private SpriteBatch		m_SpriteBatch;
+		private RenderTarget2D	m_ScreenRender;
+		private float			m_AspectRatio;
 	}
 }
