@@ -8,10 +8,10 @@ namespace BloodBulletEditor
 {
 	abstract public class GraphicsDeviceControl : Control
 	{
-		GraphicsDeviceService	m_GraphicsDeviceService;
-		protected ServiceContainer		m_Services = new ServiceContainer( );
-		protected Label			m_Label = new Label( );
-		protected bool			m_PerspectiveView;
+		GraphicsDeviceService		m_GraphicsDeviceService;
+		protected ServiceContainer	m_Services = new ServiceContainer( );
+		protected Label				m_Label = new Label( );
+		protected bool				m_PerspectiveView;
 
 		protected Microsoft.Xna.Framework.Color	m_ClearColour;
 
