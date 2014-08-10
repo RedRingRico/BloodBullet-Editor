@@ -140,16 +140,60 @@ namespace BloodBulletEditor
 				m_NetworkSession = NetworkSession.Join(
 					m_NetworkSessions[ 0 ] );
 
-				m_NetworkSessions.Dispose( );
-				m_NetworkSessions = null;
+				m_NetworkSession.SessionEnded += NetworkSessionEnded;
 
 				Return = true;
 			}
 
-			m_NetworkSessions.Dispose( );
-			m_NetworkSessions = null;
+			if( m_NetworkSessions != null )
+			{
+				m_NetworkSessions.Dispose( );
+				m_NetworkSessions = null;
+			}
 
 			return Return;
+		}
+
+		void NetworkSessionEnded( object p_Sender,
+			NetworkSessionEndedEventArgs p_Args )
+		{
+			if( p_Args.EndReason == NetworkSessionEndReason.Disconnected )
+			{
+				// Ask if the user wants to try again
+				DialogResult Result = MessageBox.Show( null,
+					"The connection to the host was lost.\nTry again?",
+					"Connection Error",
+					MessageBoxButtons.YesNo,
+					System.Windows.Forms.MessageBoxIcon.Error );
+
+				if( Result == DialogResult.Yes )
+				{
+					m_NetworkSession.Dispose( );
+					m_NetworkSession = null;
+
+					bool KeepRetrying = ( ConnectToConsole( ) == false );
+
+					while( KeepRetrying )
+					{
+						DialogResult Result2 = MessageBox.Show( null,
+							"No network sessions available",
+							"Connect",
+							MessageBoxButtons.RetryCancel,
+							System.Windows.Forms.MessageBoxIcon.Warning );
+
+						if( Result2 == DialogResult.Retry )
+						{
+							KeepRetrying = ( ConnectToConsole( ) == false );
+						}
+						else
+						{
+							KeepRetrying = false;
+						}
+					}
+				}
+			}
+			System.Diagnostics.Debug.Write( "Disconnected: " +
+				p_Args.EndReason.ToString( ) + "\n" );
 		}
 
 		private void LiveSubMenu_Disconnect( object p_Sender,
@@ -157,6 +201,8 @@ namespace BloodBulletEditor
 		{
 			if( m_NetworkSession != null )
 			{
+				m_NetworkSession.Dispose( );
+				m_NetworkSession = null;
 			}
 		}
 
@@ -246,7 +292,8 @@ namespace BloodBulletEditor
 			{
 				m_NetworkSession.Update( );
 			}
-		}	
+		}
+
 		// Logic to add:
 		// When the user clicks on the view (single), the viewport is treated as
 		// if it were a game, until the escape key is struck
