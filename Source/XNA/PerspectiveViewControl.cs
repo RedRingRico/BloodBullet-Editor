@@ -51,6 +51,8 @@ namespace BloodBulletEditor
 
 			m_PacketWriter = new PacketWriter( );
 
+			m_Connected = false;
+
 			return 0;
 		}
 		
@@ -120,35 +122,30 @@ namespace BloodBulletEditor
 				}
 			}
 
-			if( m_NetworkSessions != null )
-			{
-				m_NetworkSessions.Dispose( );
-				m_NetworkSessions = null;
-			}
+			AvailableNetworkSessionCollection NetworkSessions =
+				NetworkSession.Find( NetworkSessionType.SystemLink, 1, null );
 
-			m_NetworkSessions = NetworkSession.Find(
-				NetworkSessionType.SystemLink, 1, null );
-
-			if( m_NetworkSessions.Count > 0 )
+			if( NetworkSessions.Count > 0 )
 			{
 				foreach( AvailableNetworkSession Session in 
-					m_NetworkSessions )
+					NetworkSessions )
 				{
 					System.Diagnostics.Debug.Write( 
 						Session.HostGamertag + "\n" );
 				}
 				m_NetworkSession = NetworkSession.Join(
-					m_NetworkSessions[ 0 ] );
+					NetworkSessions[ 0 ] );
 
 				m_NetworkSession.SessionEnded += NetworkSessionEnded;
 
 				Return = true;
+				m_Connected = true;
 			}
 
-			if( m_NetworkSessions != null )
+			if( NetworkSessions != null )
 			{
-				m_NetworkSessions.Dispose( );
-				m_NetworkSessions = null;
+				NetworkSessions.Dispose( );
+				NetworkSessions = null;
 			}
 
 			return Return;
@@ -157,6 +154,7 @@ namespace BloodBulletEditor
 		void NetworkSessionEnded( object p_Sender,
 			NetworkSessionEndedEventArgs p_Args )
 		{
+			m_Connected = false;
 			if( p_Args.EndReason == NetworkSessionEndReason.Disconnected )
 			{
 				// Ask if the user wants to try again
@@ -204,6 +202,8 @@ namespace BloodBulletEditor
 				m_NetworkSession.Dispose( );
 				m_NetworkSession = null;
 			}
+
+			m_Connected = false;
 		}
 
 		private void ClearColour_ClickHandle( object p_Sender,
@@ -222,6 +222,8 @@ namespace BloodBulletEditor
 					foreach( LocalNetworkGamer Local in
 						m_NetworkSession.LocalGamers )
 					{
+						uint MessageType = 1;
+						m_PacketWriter.Write( MessageType );
 						m_PacketWriter.Write( m_ClearColour.ToVector4( ) );
 
 						Local.SendData( m_PacketWriter,
@@ -250,6 +252,28 @@ namespace BloodBulletEditor
 				{
 				}
 			}
+
+			m_ConnectionTexture = new Texture2D( GraphicsDevice, 1, 1, false,
+				SurfaceFormat.Color );
+			byte [ ] PixelData = new byte [ 4 ];
+			for( int i = 0; i < 4; ++i )
+			{
+				PixelData[ i ] = 0xFF;
+			}
+			// Create a white pixel to draw the connection status later
+			m_ConnectionTexture.SetData< byte >( PixelData );
+
+			float StartX, StartY, EndX, EndY;
+			float AdvanceX, AdvanceY;
+			AdvanceX = ClientSize.Width / 100.0f;
+			AdvanceY = ClientSize.Height / 100.0f;
+			StartX = 0.0f;
+			StartY = AdvanceY * 98;
+			EndX = StartX + ( AdvanceX * 3 );
+			EndY = StartY + ( AdvanceY * 2 );
+
+			m_ConnectedRectangle = new Rectangle( ( int )StartX, ( int )StartY,
+				( int )EndX, ( int )EndY );
 		}
 
 		protected override void Draw( )
@@ -276,6 +300,12 @@ namespace BloodBulletEditor
 			m_WorldMatrix = Matrix.Identity;
 
 			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
+
+			m_SpriteBatch.Begin( );
+			m_SpriteBatch.Draw( m_ConnectionTexture,
+				m_ConnectedRectangle,
+				m_Connected ? Color.Lime : Color.Red );
+			m_SpriteBatch.End( );
 			
 			this.GraphicsDevice.SetRenderTarget( null );
 
@@ -294,6 +324,22 @@ namespace BloodBulletEditor
 			}
 		}
 
+		protected override void OnResize( EventArgs p_Args )
+		{
+			base.OnResize( p_Args );
+			float StartX, StartY, EndX, EndY;
+			float AdvanceX, AdvanceY;
+			AdvanceX = ClientSize.Width / 100.0f;
+			AdvanceY = ClientSize.Height / 100.0f;
+			StartX = 0.0f;
+			StartY = AdvanceY * 98;
+			EndX = StartX + ( AdvanceX * 3 );
+			EndY = StartY + ( AdvanceY * 2 );
+
+			m_ConnectedRectangle = new Rectangle( ( int )StartX, ( int )StartY,
+				( int )EndX, ( int )EndY );
+		}
+
 		// Logic to add:
 		// When the user clicks on the view (single), the viewport is treated as
 		// if it were a game, until the escape key is struck
@@ -306,11 +352,13 @@ namespace BloodBulletEditor
 		private Matrix			m_ViewMatrix;
 		private Matrix			m_ProjectionMatrix;
 		private NetworkSession	m_NetworkSession;
-		private AvailableNetworkSessionCollection	m_NetworkSessions;
 		private PacketWriter	m_PacketWriter;
 		private ColorDialog		m_ColourPicker;
 		private SpriteBatch		m_SpriteBatch;
 		private RenderTarget2D	m_ScreenRender;
 		private float			m_AspectRatio;
+		private bool			m_Connected;
+		private Texture2D		m_ConnectionTexture;
+		private Rectangle		m_ConnectedRectangle;
 	}
 }
