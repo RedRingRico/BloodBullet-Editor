@@ -53,6 +53,11 @@ namespace BloodBulletEditor
 
 			m_Connected = false;
 
+			m_Effect = new BasicEffect( GraphicsDevice );
+
+			m_Effect.LightingEnabled = false;
+			m_Effect.VertexColorEnabled = true;
+
 			return 0;
 		}
 		
@@ -294,12 +299,37 @@ namespace BloodBulletEditor
 				( float )Math.PI/2.0f, m_AspectRatio, 1.0f, 100000.0f );
 
 			m_ViewMatrix = Matrix.CreateLookAt(
-				new Vector3( 10.0f, 100.0f, 100.0f ),
+				new Vector3( 100.0f, 100.0f, 100.0f ),
 				Vector3.Zero, Vector3.Up );
 
 			m_WorldMatrix = Matrix.Identity;
 
 			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
+
+			m_Effect.World = Matrix.Identity;
+			m_Effect.View = m_ViewMatrix;
+			m_Effect.Projection = m_ProjectionMatrix;
+
+			RasterizerState RasterState = new RasterizerState( );
+			RasterizerState OldState = GraphicsDevice.RasterizerState;
+			RasterState.CullMode = CullMode.None;
+			RasterState.FillMode = FillMode.WireFrame;
+			GraphicsDevice.RasterizerState = RasterState;
+
+			foreach( Game.Cube GameCube in Editor.Cubes )
+			{
+				GraphicsDevice.Indices = GameCube.IndexBuffer;
+				GraphicsDevice.SetVertexBuffer( GameCube.VertexBuffer );
+				foreach( EffectPass Pass in m_Effect.CurrentTechnique.Passes )
+				{
+					Pass.Apply( );
+					GraphicsDevice.DrawIndexedPrimitives(
+						PrimitiveType.TriangleList, 0, 0,
+						GameCube.IndexBuffer.IndexCount, 0, 12 );
+				}
+			}
+
+			GraphicsDevice.RasterizerState = OldState;
 
 			m_SpriteBatch.Begin( );
 			m_SpriteBatch.Draw( m_ConnectionTexture,
@@ -360,5 +390,6 @@ namespace BloodBulletEditor
 		private bool			m_Connected;
 		private Texture2D		m_ConnectionTexture;
 		private Rectangle		m_ConnectedRectangle;
+		private BasicEffect		m_Effect;
 	}
 }

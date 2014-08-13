@@ -2,6 +2,8 @@
 using System.Drawing;
 using System.Reflection;
 using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BloodBulletEditor
 {
@@ -21,6 +23,7 @@ namespace BloodBulletEditor
 
 		private void InitializeComponent( )
 		{
+			Cubes = new List< Game. Cube >( );
 			m_MainMenu = new MainMenu( );
 			m_SplitContainers = new SplitContainer[ 3 ];
 			for( int i = 0; i < 3; ++i )
@@ -83,7 +86,19 @@ namespace BloodBulletEditor
 			m_SplitContainers[ 0 ].SplitterDistance = Width / 4;
 			m_SplitContainers[ 0 ].TabIndex = 0;
 
+
+			Image CreateBoxImage;
+			CreateBoxImage = Image.FromFile( @"Icons\CreateBox.png" );
+			ToolStripButton CreateBoxButton = new ToolStripButton(
+				String.Empty, CreateBoxImage, BoxCreate_OnClick,
+				"Create Box" );
+
+			ToolStripItem [ ]ToolStripItems = new ToolStripItem[ 1 ];
+			ToolStripItems[ 0 ] = CreateBoxButton;
+			m_ToolStrip = new ToolStrip( ToolStripItems );
+
 			this.Controls.Add( m_SplitContainers[ 0 ] );
+			this.Controls.Add( m_ToolStrip );
 
 			this.m_Components = new System.ComponentModel.Container( );
 			this.AutoScaleMode = AutoScaleMode.Font;
@@ -113,7 +128,7 @@ namespace BloodBulletEditor
 			}
 		}
 
-		void Ctrl_PreviewKeyDown( object sender,
+		void Ctrl_PreviewKeyDown( object p_Sender,
 			PreviewKeyDownEventArgs p_Args )
 		{
 			switch( p_Args.KeyCode )
@@ -133,11 +148,28 @@ namespace BloodBulletEditor
 			}
 		}
 
+		void BoxCreate_OnClick( object p_Sender, EventArgs p_Args )
+		{
+			Microsoft.Xna.Framework.Vector3 Minimum =
+				new Microsoft.Xna.Framework.Vector3( -50.0f, -50.0f, -50.0f );
+			Microsoft.Xna.Framework.Vector3 Maximum =
+				new Microsoft.Xna.Framework.Vector3( 50.0f, 50.0f, 50.0f );
+			// Create a 1m^2 cube (1 world unit == 1cm)
+			Game.Cube NewCube = new Game.Cube( Editor.GraphicsDevice,
+				Minimum, Maximum, Microsoft.Xna.Framework.Color.White );
+
+			Cubes.Add( NewCube );
+		}
+
 		private OrthographicViewControl	[ ] m_OrthographicViews;
 		private PerspectiveViewControl	m_PerspectiveView;
 		private MainMenu				m_MainMenu;
 		private MenuItem				m_FileMenu;
 		private MenuItem				m_FileExit;
 		private SplitContainer			[ ] m_SplitContainers;
+		private ToolStrip				m_ToolStrip;
+
+		public static GraphicsDevice	GraphicsDevice;
+		public static List< Game.Cube > Cubes;
 	}
 }

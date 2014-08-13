@@ -54,6 +54,8 @@ namespace BloodBulletEditor
 
 			this.ContextMenu = m_ContextMenu;
 
+			m_Effect = new BasicEffect( GraphicsDevice );
+
 			return 0;
 		}
 
@@ -77,19 +79,19 @@ namespace BloodBulletEditor
 				case VIEWPLANE.VIEWPLANE_XY:
 				{
 					this.Name = "Orthographic View [Front]";
-					m_CameraPosition.Z = -1.1f;
+					m_CameraPosition.Z = -1000.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_XZ:
 				{
 					this.Name = "Orthographic View [Top]";
-					m_CameraPosition.Y = 1.1f;
+					m_CameraPosition.Y = 1000.0f;
 					break;
 				}
 				case VIEWPLANE.VIEWPLANE_YZ:
 				{
 					this.Name = "Orthographic View [Side]";
-					m_CameraPosition.X = 1.1f;
+					m_CameraPosition.X = 1000.0f;
 					break;
 				}
 			}
@@ -210,6 +212,31 @@ namespace BloodBulletEditor
 
 			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
 
+			m_Effect.World = Matrix.Identity;
+			m_Effect.View = m_ViewMatrix;
+			m_Effect.Projection = m_ProjectionMatrix;
+
+			RasterizerState RasterState = new RasterizerState( );
+			RasterizerState OldState = GraphicsDevice.RasterizerState;
+			RasterState.CullMode = CullMode.None;
+			RasterState.FillMode = FillMode.WireFrame;
+			GraphicsDevice.RasterizerState = RasterState;
+
+			foreach( Game.Cube GameCube in Editor.Cubes )
+			{
+				GraphicsDevice.Indices = GameCube.IndexBuffer;
+				GraphicsDevice.SetVertexBuffer( GameCube.VertexBuffer );
+				foreach( EffectPass Pass in m_Effect.CurrentTechnique.Passes )
+				{
+					Pass.Apply( );
+					GraphicsDevice.DrawIndexedPrimitives(
+						PrimitiveType.TriangleList, 0, 0,
+						GameCube.IndexBuffer.IndexCount, 0, 12 );
+				}
+			}
+
+			GraphicsDevice.RasterizerState = OldState;
+
 			m_ScaleAdd = 0.0f;
 			m_XDelta = 0.0f;
 			m_YDelta = 0.0f;
@@ -327,5 +354,6 @@ namespace BloodBulletEditor
 		private Grid				m_Grid;
 		private ContextMenu			m_ContextMenu;
 		private Vector3				m_LookPoint;
+		private BasicEffect		m_Effect;
 	}
 }

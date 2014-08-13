@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.Xna.Framework.Graphics;
+using System.Windows.Forms;
 
 namespace BloodBulletEditor
 {
@@ -39,6 +40,8 @@ namespace BloodBulletEditor
 			m_GraphicsDevice = new GraphicsDevice(
 				GraphicsAdapter.DefaultAdapter,
 				GraphicsProfile.HiDef, m_PresentationParameters );
+
+			Editor.GraphicsDevice = m_GraphicsDevice;
 		}
 
 		public static GraphicsDeviceService AddReference( IntPtr p_WindowHandle,
@@ -55,7 +58,7 @@ namespace BloodBulletEditor
 
 		public void Release( bool p_Disposing )
 		{
-			if (Interlocked.Decrement(ref m_ReferenceCount) == 0)
+			if( Interlocked.Decrement( ref m_ReferenceCount ) == 0 )
 			{
 				if( p_Disposing )
 				{
