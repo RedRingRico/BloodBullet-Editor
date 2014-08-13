@@ -212,7 +212,7 @@ namespace BloodBulletEditor
 
 			m_Grid.Render( m_WorldMatrix, m_ViewMatrix, m_ProjectionMatrix );
 
-			m_Effect.World = Matrix.Identity;
+			m_Effect.World = Matrix.CreateScale( m_Scale );
 			m_Effect.View = m_ViewMatrix;
 			m_Effect.Projection = m_ProjectionMatrix;
 
