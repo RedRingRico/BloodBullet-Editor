@@ -56,11 +56,16 @@ namespace BloodBulletEditor
 			m_FileMenu = new MenuItem( "&File" );
 			m_FileExit = new MenuItem( "&Exit",
 				this.FileExit, Shortcut.CtrlQ );
+            m_ToolMenu = new MenuItem( "&Tool" );
+            m_ToolModelEditor = new MenuItem( "&Model Editor",
+                this.ModelEditor, Shortcut.CtrlM );
 
 			this.SuspendLayout( );
 
 			m_MainMenu.MenuItems.Add( m_FileMenu );
 			m_FileMenu.MenuItems.Add( m_FileExit );
+            m_MainMenu.MenuItems.Add( m_ToolMenu );
+            m_ToolMenu.MenuItems.Add( m_ToolModelEditor );
 
 			this.Menu = m_MainMenu;
 
@@ -85,7 +90,6 @@ namespace BloodBulletEditor
 			m_SplitContainers[ 0 ].Panel2.Controls.Add( m_SplitContainers[ 2 ] );
 			m_SplitContainers[ 0 ].SplitterDistance = Width / 4;
 			m_SplitContainers[ 0 ].TabIndex = 0;
-
 
 			Image CreateBoxImage;
 			CreateBoxImage = Image.FromFile( @"Icons\CreateBox.png" );
@@ -117,6 +121,26 @@ namespace BloodBulletEditor
 		{
 			this.Close( );
 		}
+
+        private void ModelEditor( object p_Sender, System.EventArgs p_Args )
+        {
+            if( m_ModelEditor == null )
+            {
+                m_ModelEditor = new Model.ModelEditor( );
+                m_ModelEditor.Show( );
+            }
+            else
+            {
+                if( m_ModelEditor.IsClosed( ) )
+                {
+                    m_ModelEditor.Show( );
+                }
+                else
+                {
+                    m_ModelEditor.BringToFront( );
+                }
+            }
+        }
 
 		private void RemoveCursorNavigation(
 			Control.ControlCollection p_Controls )
@@ -151,9 +175,9 @@ namespace BloodBulletEditor
 		void BoxCreate_OnClick( object p_Sender, EventArgs p_Args )
 		{
 			Microsoft.Xna.Framework.Vector3 Minimum =
-				new Microsoft.Xna.Framework.Vector3( -50.0f, -50.0f, -50.0f );
+				new Microsoft.Xna.Framework.Vector3( -50.0f, 0.0f, -50.0f );
 			Microsoft.Xna.Framework.Vector3 Maximum =
-				new Microsoft.Xna.Framework.Vector3( 50.0f, 50.0f, 50.0f );
+				new Microsoft.Xna.Framework.Vector3( 50.0f, 100.0f, 50.0f );
 			// Create a 1m^2 cube (1 world unit == 1cm)
 			Game.Cube NewCube = new Game.Cube( Editor.GraphicsDevice,
 				Minimum, Maximum, Microsoft.Xna.Framework.Color.White );
@@ -166,8 +190,12 @@ namespace BloodBulletEditor
 		private MainMenu				m_MainMenu;
 		private MenuItem				m_FileMenu;
 		private MenuItem				m_FileExit;
+        private MenuItem                m_ToolMenu;
+        private MenuItem                m_ToolModelEditor;
 		private SplitContainer			[ ] m_SplitContainers;
 		private ToolStrip				m_ToolStrip;
+
+        private Model.ModelEditor       m_ModelEditor = null;
 
 		public static GraphicsDevice	GraphicsDevice;
 		public static List< Game.Cube > Cubes;

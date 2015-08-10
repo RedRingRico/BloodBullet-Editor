@@ -47,7 +47,7 @@ namespace BloodBulletEditor
 		public static GraphicsDeviceService AddReference( IntPtr p_WindowHandle,
 				int p_Width, int p_Height )
 		{
-			if (Interlocked.Increment(ref m_ReferenceCount) == 1)
+			if( Interlocked.Increment( ref m_ReferenceCount ) == 1 )
 			{
 				Instance = new GraphicsDeviceService( p_WindowHandle, p_Width,
 					p_Height );

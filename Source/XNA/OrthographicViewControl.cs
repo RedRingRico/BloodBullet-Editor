@@ -23,6 +23,7 @@ namespace BloodBulletEditor
 
 		protected override int Initialise( )
 		{
+            m_HasGWFL = false;
 			m_PerspectiveView = false;
 			Application.Idle += delegate { Invalidate( ); };
 
@@ -56,6 +57,9 @@ namespace BloodBulletEditor
 
 			m_Effect = new BasicEffect( GraphicsDevice );
 
+            m_ScreenRender = new RenderTarget2D( GraphicsDevice, this.Width, this.Height );
+            m_SpriteBatch = new SpriteBatch( this.GraphicsDevice );
+
 			return 0;
 		}
 
@@ -72,7 +76,7 @@ namespace BloodBulletEditor
 			m_CameraPosition = Vector3.Zero;
 			m_LookPoint = Vector3.Zero;
 
-			m_ClearColour = new Color( 32, 32, 32 );
+			m_ClearColour = new Color( 8, 8, 8 );
 
 			switch( m_ViewPlane )
 			{
@@ -124,6 +128,17 @@ namespace BloodBulletEditor
 
 		protected override void Draw( )
 		{
+            if( Width != m_ScreenRender.Width ||
+                Height != m_ScreenRender.Height )
+            {
+                m_ScreenRender = null;
+                m_ScreenRender = new RenderTarget2D( this.GraphicsDevice, this.Width,
+                    this.Height );
+            }
+
+            this.GraphicsDevice.SetRenderTarget( m_ScreenRender );
+            this.GraphicsDevice.Clear( m_ClearColour );
+
 			m_ProjectionMatrix = Matrix.CreateOrthographic(
 				GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
 				0.1f, 1000000.0f );
@@ -241,6 +256,17 @@ namespace BloodBulletEditor
 			m_XDelta = 0.0f;
 			m_YDelta = 0.0f;
 			m_ZDelta = 0.0f;
+
+            this.GraphicsDevice.SetRenderTarget( null );
+
+			m_SpriteBatch.Begin( );
+			m_SpriteBatch.Draw(( Texture2D ) m_ScreenRender,
+				new Rectangle( 0, 0, m_ScreenRender.Width, m_ScreenRender.Height ),/*
+				GraphicsDevice.PresentationParameters.BackBufferWidth,
+					GraphicsDevice.PresentationParameters.BackBufferHeight ),*/
+					new Rectangle( 0, 0, Width, Height ),
+					Color.White );
+			m_SpriteBatch.End( );
 		}
 
 		public VIEWPLANE ViewPlane
@@ -354,6 +380,8 @@ namespace BloodBulletEditor
 		private Grid				m_Grid;
 		private ContextMenu			m_ContextMenu;
 		private Vector3				m_LookPoint;
-		private BasicEffect		m_Effect;
+		private BasicEffect		    m_Effect;
+        private RenderTarget2D      m_ScreenRender;
+        private SpriteBatch         m_SpriteBatch;
 	}
 }

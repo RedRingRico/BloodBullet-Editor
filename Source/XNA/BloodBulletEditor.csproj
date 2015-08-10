@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSG\CSGPrimitive.cs" />
+    <Compile Include="CSG\Cube.cs" />
     <Compile Include="Editor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -64,6 +66,14 @@
     </Compile>
     <Compile Include="GraphicsDeviceService.cs" />
     <Compile Include="Grid.cs" />
+    <Compile Include="Model\Mesh.cs" />
+    <Compile Include="Model\Model.cs" />
+    <Compile Include="Model\ModelEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\ModelEditor.Designer.cs">
+      <DependentUpon>ModelEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="OrthographicViewControl.cs">
       <SubType>Component</SubType>
     </Compile>

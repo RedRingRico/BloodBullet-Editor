@@ -12,6 +12,7 @@ namespace BloodBulletEditor
 		protected ServiceContainer	m_Services = new ServiceContainer( );
 		protected Label				m_Label = new Label( );
 		protected bool				m_PerspectiveView;
+        protected bool              m_HasGWFL;
 
 		protected Microsoft.Xna.Framework.Color	m_ClearColour;
 
@@ -59,6 +60,8 @@ namespace BloodBulletEditor
 				m_Label.Text = this.Name;
 				m_Label.AutoSize = true;
 				this.Controls.Add( m_Label );
+
+                System.Diagnostics.Debug.WriteLine( "Handle: {0}", Handle );
 			}
 
 			base.OnCreateControl( );
@@ -132,9 +135,13 @@ namespace BloodBulletEditor
 		{
 			try
 			{
-				// For the perspective, the GFWL Guide only seems to work with
-				// Present with no parameters
-				if( m_PerspectiveView )
+                if( GamerServicesDispatcher.IsInitialized )
+                {
+                    GamerServicesDispatcher.Update( );
+                }
+				// The GFWL Guide only seems to work with Present with no
+                // parameters
+				if( m_HasGWFL )
 				{
 					GraphicsDevice.Present( );
 				}
@@ -145,11 +152,6 @@ namespace BloodBulletEditor
 							ClientSize.Width, ClientSize.Height );
 
 					GraphicsDevice.Present( SourceRectangle, null, this.Handle );
-				}
-
-				if( GamerServicesDispatcher.IsInitialized )
-				{
-					GamerServicesDispatcher.Update( );
 				}
 			}
 			catch
