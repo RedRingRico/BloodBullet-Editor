@@ -4,6 +4,8 @@ using System.Reflection;
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.GameStudio.PlatformTools;
+using System.Runtime.InteropServices;
 
 namespace BloodBulletEditor
 {
@@ -97,8 +99,15 @@ namespace BloodBulletEditor
 				String.Empty, CreateBoxImage, BoxCreate_OnClick,
 				"Create Box" );
 
-			ToolStripItem [ ]ToolStripItems = new ToolStripItem[ 1 ];
+			Image StartGameImage;
+			StartGameImage = Image.FromFile( @"Icons\StartGame.png" );
+			ToolStripButton StartGameButton = new ToolStripButton(
+				string.Empty, StartGameImage, StartGame_OnClick,
+				"Start Game" );
+
+			ToolStripItem [ ]ToolStripItems = new ToolStripItem[ 2 ];
 			ToolStripItems[ 0 ] = CreateBoxButton;
+			ToolStripItems[ 1 ] = StartGameButton;
 			m_ToolStrip = new ToolStrip( ToolStripItems );
 
 			this.Controls.Add( m_SplitContainers[ 0 ] );
@@ -183,6 +192,45 @@ namespace BloodBulletEditor
 				Minimum, Maximum, Microsoft.Xna.Framework.Color.White );
 
 			Cubes.Add( NewCube );
+		}
+
+		void StartGame_OnClick( object p_Sender, EventArgs p_Args )
+		{
+			IPlatform Target = PlatformManager.GetPlatform( "Xbox 360",
+				"Xbox 360.v4.0.HiDef" );
+			ILaunchService Launcher = ( ILaunchService ) Target.GetTitlePlayer(
+				Target.DefaultTitlePlayer ).GetService(
+					typeof( ILaunchService ) );
+			Assembly GameAssembly = Assembly.GetExecutingAssembly( );
+			GuidAttribute AssemblyAttribute =
+				( GuidAttribute )GameAssembly.GetCustomAttributes(
+					typeof( GuidAttribute ), true )[ 0 ];
+			string GUIDString = AssemblyAttribute.Value;
+
+
+			using( ( IDisposable )Launcher )
+			{
+				Guid GameGUID = new Guid( );
+				try
+				{
+					ITitleProcess TitleProcess = !Guid.TryParse(
+						GUIDString, out GameGUID ) ?
+						Launcher.Launch( GUIDString, string.Empty,
+							string.Empty ) :
+						Launcher.LaunchTitle( GUIDString, string.Empty,
+							string.Empty );
+
+					if( TitleProcess != null )
+					{
+						( ( IDisposable ) TitleProcess ).Dispose( );
+					}
+				}
+				catch( PlatformToolsException Exception )
+				{
+					MessageBox.Show( Exception.Message,
+						"Blood Bullet Editor" );
+				}
+			}
 		}
 
 		private OrthographicViewControl	[ ] m_OrthographicViews;
